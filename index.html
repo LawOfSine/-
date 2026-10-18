@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>易经算卦 · 六爻占卜</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #1a1410 0%, #2d231c 100%);
+      font-family: 'Georgia', '宋体', 'KaiTi', serif;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 720px;
+      width: 100%;
+      background: linear-gradient(165deg, #f7efe6 0%, #e8dccc 100%);
+      border-radius: 48px 48px 32px 32px;
+      padding: 36px 32px 42px;
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        inset 0 2px 4px rgba(255, 245, 230, 0.5),
+        0 0 0 1px rgba(180, 140, 100, 0.3);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    /* 装饰线 */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 40px;
+      right: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #b8a088, #d4b8a0, #b8a088, transparent);
+      opacity: 0.5;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #3d2a1b;
+      letter-spacing: 12px;
+      text-shadow: 0 2px 4px rgba(180, 140, 100, 0.2);
+      font-family: '华文楷体', 'KaiTi', 'Georgia', serif;
+    }
+
+    .header .sub {
+      font-size: 14px;
+      color: #8a7a6a;
+      letter-spacing: 6px;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* 六爻区域 */
+    .hexagram-area {
+      background: #faf3e9;
+      border-radius: 28px;
+      padding: 32px 20px 28px;
+      box-shadow: inset 0 4px 12px rgba(120, 80, 50, 0.15), 0 6px 20px rgba(60, 40, 20, 0.15);
+      border: 1px solid #e6d6c4;
+      margin-bottom: 24px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.4s ease;
+    }
+
+    .hexagram-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #3d2a1b;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hexagram-title .gua-name {
+      background: #3d2a1b;
+      color: #f7efe6;
+      padding: 2px 18px;
+      border-radius: 30px;
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
+
+    .hexagram-title .gua-symbol {
+      font-size: 32px;
+      color: #5a3f2b;
+    }
+
+    .hexagram-lines {
+      display: flex;
+      flex-direction: column-reverse;
+      /* 从下到上 */
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .line-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 38px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .line-wrapper .line-label {
+      position: absolute;
+      left: -36px;
+      font-size: 12px;
+      color: #9a8a7a;
+      font-family: 'Georgia', serif;
+      letter-spacing: 0;
+      width: 30px;
+      text-align: right;
+    }
+
+    .line {
+      height: 8px;
+      border-radius: 6px;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background: #3d2a1b;
+      box-shadow: 0 2px 4px rgba(60, 40, 20, 0.15);
+    }
+
+    .line-yang {
+      width: 80px;
+      background: #3d2a1b;
+    }
+
+    .line-yin {
+      width: 80px;
+      background: transparent;
+      border: 3px solid #3d2a1b;
+      border-radius: 6px;
+      height: 6px;
+      box-shadow: none;
+    }
+
+    .line-changing {
+      opacity: 0.6;
+      position: relative;
+    }
+
+    .line-changing::after {
+      content: '⚡';
+      position: absolute;
+      right: -28px;
+      font-size: 16px;
+      color: #c0392b;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* 卦辞解释 */
+    .interpretation {
+      margin-top: 16px;
+      padding: 14px 20px;
+      background: rgba(255, 245, 230, 0.6);
+      border-radius: 20px;
+      border-left: 4px solid #b8a088;
+      min-height: 56px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      font-size: 16px;
+      color: #3d2a1b;
+      line-height: 1.7;
+      letter-spacing: 1px;
+      font-family: 'Georgia', '宋体', serif;
+      transition: all 0.4s ease;
+    }
+
+    .interpretation .empty-hint {
+      color: #b0a090;
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    /* 按钮区域 */
+    .action-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 14px 40px;
+      font-size: 18px;
+      font-family: 'Georgia', '华文楷体', serif;
+      border: none;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      letter-spacing: 4px;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+      min-width: 140px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(145deg, #5a3f2b, #3d2a1b);
+      color: #f7efe6;
+      box-shadow: 0 6px 20px rgba(60, 40, 20, 0.35), inset 0 1px 0 rgba(255, 215, 180, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 10px 32px rgba(60, 40, 20, 0.45), inset 0 1px 0 rgba(255, 215, 180, 0.2);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0px) scale(0.97);
+      box-shadow: 0 4px 12px rgba(60, 40, 20, 0.3);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(145deg, #e8dccc, #dccfc0);
+      color: #3d2a1b;
+      box-shadow: 0 4px 12px rgba(60, 40, 20, 0.15), inset 0 1px 0 rgba(255, 245, 230, 0.6);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(60, 40, 20, 0.2);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(0px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      transform: none !important;
+      cursor: not-allowed;
+    }
+
+    /* 摇卦动画 */
+    .shaking .btn-primary {
+      animation: shake 0.6s ease-in-out 3;
+    }
+
+    @keyframes shake {
+      0%,
+      100% {
+        transform: rotate(0deg) translateX(0);
+      }
+      15% {
+        transform: rotate(8deg) translateX(6px);
+      }
+      30% {
+        transform: rotate(-6deg) translateX(-4px);
+      }
+      45% {
+        transform: rotate(4deg) translateX(3px);
+      }
+      60% {
+        transform: rotate(-3deg) translateX(-2px);
+      }
+      80% {
+        transform: rotate(2deg) translateX(1px);
+      }
+    }
+
+    /* 爻生成动画 */
+    .line-appear {
+      animation: linePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      opacity: 0;
+      transform: scale(0.6);
+    }
+
+    @keyframes linePop {
+      0% {
+        opacity: 0;
+        transform: scale(0.6) rotate(-10deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    .line-appear:nth-child(1) {
+      animation-delay: 0.05s;
+    }
+    .line-appear:nth-child(2) {
+      animation-delay: 0.10s;
+    }
+    .line-appear:nth-child(3) {
+      animation-delay: 0.15s;
+    }
+    .line-appear:nth-child(4) {
+      animation-delay: 0.20s;
+    }
+    .line-appear:nth-child(5) {
+      animation-delay: 0.25s;
+    }
+    .line-appear:nth-child(6) {
+      animation-delay: 0.30s;
+    }
+
+    /* 底部信息 */
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 12px;
+      color: #b0a090;
+      letter-spacing: 2px;
+      border-top: 1px solid rgba(180, 160, 140, 0.3);
+      padding-top: 18px;
+    }
+
+    .footer span {
+      display: inline-block;
+      margin: 0 6px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 540px) {
+      .container {
+        padding: 24px 16px 30px;
+        border-radius: 32px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        letter-spacing: 8px;
+      }
+
+      .hexagram-area {
+        padding: 20px 12px 18px;
+        min-height: 200px;
+      }
+
+      .line-yang,
+      .line-yin {
+        width: 60px;
+      }
+
+      .line-wrapper .line-label {
+        left: -28px;
+        font-size: 10px;
+      }
+
+      .hexagram-title {
+        font-size: 18px;
+      }
+
+      .btn {
+        padding: 12px 28px;
+        font-size: 16px;
+        min-width: 110px;
+      }
+
+      .interpretation {
+        font-size: 14px;
+        padding: 12px 14px;
+      }
+
+      .container::before {
+        left: 20px;
+        right: 20px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .btn-group {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn {
+        width: 100%;
+        max-width: 220px;
+      }
+
+      .line-yang,
+      .line-yin {
+        width: 50px;
+      }
+
+      .line-wrapper {
+        height: 32px;
+      }
+    }
+
+    /* 五行颜色点缀 */
+    .element-tag {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 14px;
+      border-radius: 20px;
+      background: rgba(180, 140, 100, 0.15);
+      color: #8a6a4a;
+      letter-spacing: 1px;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 头部 -->
+  <div class="header">
+    <h1>六 爻 占 卜</h1>
+    <div class="sub">— 易经 · 观天之道 —</div>
+  </div>
+
+  <!-- 卦象显示 -->
+  <div class="hexagram-area" id="hexagramArea">
+    <div class="hexagram-title" id="hexagramTitle">
+      <span class="gua-symbol" id="guaSymbol">☯</span>
+      <span class="gua-name" id="guaName">—</span>
+      <span class="element-tag" id="elementTag">五行</span>
+    </div>
+
+    <div class="hexagram-lines" id="hexagramLines">
+      <!-- 六个爻由JS动态生成 -->
+      <div class="line-wrapper"><span class="line-label">上九</span><div class="line line-yang"></div></div>
+      <div class="line-wrapper"><span class="line-label">九五</span><div class="line line-yang"></div></div>
+      <div class="line-wrapper"><span class="line-label">六四</span><div class="line line-yin"></div></div>
+      <div class="line-wrapper"><span class="line-label">六三</span><div class="line line-yin"></div></div>
+      <div class="line-wrapper"><span class="line-label">九二</span><div class="line line-yang"></div></div>
+      <div class="line-wrapper"><span class="line-label">初九</span><div class="line line-yang"></div></div>
+    </div>
+
+    <div class="interpretation" id="interpretation">
+      <span class="empty-hint">🙏 点击「起卦」以占卜</span>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="action-area">
+    <div class="btn-group">
+      <button class="btn btn-primary" id="btnCast">🌿 起 卦</button>
+      <button class="btn btn-secondary" id="btnClear">⟳ 清 空</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>⚘ 心诚则灵</span>
+    <span>·</span>
+    <span>三枚铜钱 · 六次成卦</span>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  //  1. 六十四卦完整数据 (按易经卦序排列)
+  //     每条记录: [卦名, 六爻(从下到上, 阳=1 阴=0), 卦辞/解释]
+  // ============================================================
+  const HEXAGRAMS_DATA = [
+    //  0: 乾 ䷀  111111
+    ['乾', '111111', '元亨利贞。天行健，君子以自强不息。大吉。'],
+    //  1: 坤 ䷁  000000
+    ['坤', '000000', '元亨，利牝马之贞。地势坤，君子以厚德载物。大吉。'],
+    //  2: 屯 ䷂  100010
+    ['屯', '100010', '元亨利贞，勿用有攸往。刚柔始交，难生。吉。'],
+    //  3: 蒙 ䷃  010001
+    ['蒙', '010001', '亨。匪我求童蒙，童蒙求我。山下出泉，蒙。吉。'],
+    //  4: 需 ䷄  111010
+    ['需', '111010', '有孚，光亨，贞吉。云上于天，需。吉。'],
+    //  5: 讼 ䷅  010111
+    ['讼', '010111', '有孚，窒惕，中吉。天与水违行，讼。平。'],
+    //  6: 师 ䷆  010000
+    ['师', '010000', '贞，丈人吉。地中有水，师。吉。'],
+    //  7: 比 ䷇  000010
+    ['比', '000010', '吉。原筮元永贞。地上有水，比。吉。'],
+    //  8: 小畜 ䷈  110111
+    ['小畜', '110111', '亨。密云不雨，自我西郊。风天小畜。吉。'],
+    //  9: 履 ䷉  110011
+    ['履', '110011', '履虎尾，不咥人，亨。上天下泽，履。吉。'],
+    // 10: 泰 ䷊  111000
+    ['泰', '111000', '小往大来，吉亨。天地交泰。大吉。'],
+    // 11: 否 ䷋  000111
+    ['否', '000111', '否之匪人，不利君子贞。天地不交。凶。'],
+    // 12: 同人 ䷌  101111
+    ['同人', '101111', '同人于野，亨。天与火，同人。吉。'],
+    // 13: 大有 ䷍  111101
+    ['大有', '111101', '元亨。火在天上，大有。大吉。'],
+    // 14: 谦 ䷎  001000
+    ['谦', '001000', '亨，君子有终。地中有山，谦。大吉。'],
+    // 15: 豫 ䷏  001100
+    ['豫', '001100', '利建侯行师。雷出地奋，豫。吉。'],
+    // 16: 随 ䷐  100110
+    ['随', '100110', '元亨利贞。泽中有雷，随。吉。'],
+    // 17: 蛊 ䷑  110100
+    ['蛊', '110100', '元亨，利涉大川。山下有风，蛊。平。'],
+    // 18: 临 ䷒  110000
+    ['临', '110000', '元亨利贞。泽上有地，临。吉。'],
+    // 19: 观 ䷓  000011
+    ['观', '000011', '盥而不荐，有孚颙若。风行地上，观。吉。'],
+    // 20: 噬嗑 ䷔  101001
+    ['噬嗑', '101001', '亨，利用狱。雷电噬嗑。吉。'],
+    // 21: 贲 ䷕  101100
+    ['贲', '101100', '亨。小利有攸往。山下有火，贲。吉。'],
+    // 22: 剥 ䷖  000001
+    ['剥', '000001', '不利有攸往。山附于地，剥。凶。'],
+    // 23: 复 ䷗  100000
+    ['复', '100000', '亨。出入无疾。雷在地中，复。吉。'],
+    // 24: 无妄 ䷘  100111
+    ['无妄', '100111', '元亨利贞。天下雷行，物与无妄。大吉。'],
+    // 25: 大畜 ䷙  111001
+    ['大畜', '111001', '利贞。天在山中，大畜。吉。'],
+    // 26: 颐 ䷚  100001
+    ['颐', '100001', '贞吉。山下有雷，颐。吉。'],
+    // 27: 大过 ䷛  011110
+    ['大过', '011110', '栋桡，利有攸往。泽灭木，大过。凶。'],
+    // 28: 坎 ䷜  010010
+    ['坎', '010010', '习坎，有孚。水洊至，习坎。平。'],
+    // 29: 离 ䷝  101101
+    ['离', '101101', '利贞，亨。明两作，离。吉。'],
+    // 30: 咸 ䷞  001110
+    ['咸', '001110', '亨，利贞。山上有泽，咸。吉。'],
+    // 31: 恒 ䷟  110001
+    ['恒', '110001', '亨，无咎。雷风相与，恒。吉。'],
+    // 32: 遁 ䷠  001111
+    ['遁', '001111', '亨，小利贞。天下有山，遁。平。'],
+    // 33: 大壮 ䷡  111100
+    ['大壮', '111100', '利贞。雷在天上，大壮。吉。'],
+    // 34: 晋 ䷢  000101
+    ['晋', '000101', '康侯用锡马蕃庶。明出地上，晋。吉。'],
+    // 35: 明夷 ䷣  101000
+    ['明夷', '101000', '利艰贞。明入地中，明夷。凶。'],
+    // 36: 家人 ䷤  110101
+    ['家人', '110101', '利女贞。风自火出，家人。吉。'],
+    // 37: 睽 ䷥  101110
+    ['睽', '101110', '小事吉。上火下泽，睽。平。'],
+    // 38: 蹇 ䷦  001010
+    ['蹇', '001010', '利西南，不利东北。山上有水，蹇。凶。'],
+    // 39: 解 ䷧  010100
+    ['解', '010100', '利西南。雷雨作，解。吉。'],
+    // 40: 损 ䷨  100011
+    ['损', '100011', '有孚，元吉。山下有泽，损。吉。'],
+    // 41: 益 ䷩  110011
+    ['益', '110011', '利有攸往。风雷相益。大吉。'],
+    // 42: 夬 ䷪  111110
+    ['夬', '111110', '扬于王庭。泽天夬。吉。'],
+    // 43: 姤 ䷫  011111
+    ['姤', '011111', '女壮，勿用取女。天下有风，姤。凶。'],
+    // 44: 萃 ䷬  011000
+    ['萃', '011000', '亨，王假有庙。泽上于地，萃。吉。'],
+    // 45: 升 ䷭  000110
+    ['升', '000110', '元亨。地中生木，升。大吉。'],
+    // 46: 困 ䷮  010110
+    ['困', '010110', '亨，贞。泽无水，困。凶。'],
+    // 47: 井 ䷯  011010
+    ['井', '011010', '改邑不改井。木上有水，井。吉。'],
+    // 48: 革 ䷰  011101
+    ['革', '011101', '己日乃孚。泽中有火，革。吉。'],
+    // 49: 鼎 ䷱  101110
+    ['鼎', '101110', '元吉，亨。木上有火，鼎。大吉。'],
+    // 50: 震 ䷲  100100
+    ['震', '100100', '亨。震来虩虩。洊雷，震。吉。'],
+    // 51: 艮 ䷳  001001
+    ['艮', '001001', '艮其背，不获其身。兼山，艮。吉。'],
+    // 52: 渐 ䷴  001101
+    ['渐', '001101', '女归吉。山上有木，渐。大吉。'],
+    // 53: 归妹 ䷵  101100
+    ['归妹', '101100', '征凶，无攸利。泽上有雷，归妹。凶。'],
+    // 54: 丰 ䷶  101101
+    ['丰', '101101', '亨，王假之。雷电皆至，丰。吉。'],
+    // 55: 旅 ䷷  000100
+    ['旅', '000100', '小亨。山上有火，旅。平。'],
+    // 56: 巽 ䷸  110110
+    ['巽', '110110', '小亨。随风，巽。吉。'],
+    // 57: 兑 ䷹  011011
+    ['兑', '011011', '亨，利贞。丽泽，兑。吉。'],
+    // 58: 涣 ䷺  010011
+    ['涣', '010011', '亨。风行水上，涣。吉。'],
+    // 59: 节 ䷻  011001
+    ['节', '011001', '亨。泽上有水，节。吉。'],
+    // 60: 中孚 ䷼  110011
+    ['中孚', '110011', '豚鱼吉。泽上有风，中孚。大吉。'],
+    // 61: 小过 ䷽  001100
+    ['小过', '001100', '亨，利贞。山上有雷，小过。平。'],
+    // 62: 既济 ䷾  010101
+    ['既济', '010101', '亨，小利贞。水火既济。大吉。'],
+    // 63: 未济 ䷿  101010
+    ['未济', '101010', '亨。火在水上，未济。平。']
+  ];
+
+  // ============================================================
+  //  2. 构建查找表 (key: 六爻二进制字符串)
+  // ============================================================
+  const guaMap = {};
+  HEXAGRAMS_DATA.forEach(([name, lines, desc]) => {
+    guaMap[lines] = { name, lines, desc };
+  });
+
+  // 爻位标签 (从下到上)
+  const POSITION_NAMES = ['初', '二', '三', '四', '五', '上'];
+  const POSITION_YIN_YANG = ['九', '六']; // 阳为九，阴为六
+
+  // ============================================================
+  //  3. DOM 引用
+  // ============================================================
+  const linesContainer = document.getElementById('hexagramLines');
+  const guaNameEl = document.getElementById('guaName');
+  const guaSymbolEl = document.getElementById('guaSymbol');
+  const elementTagEl = document.getElementById('elementTag');
+  const interpretationEl = document.getElementById('interpretation');
+  const btnCast = document.getElementById('btnCast');
+  const btnClear = document.getElementById('btnClear');
+  const hexagramArea = document.getElementById('hexagramArea');
+
+  // ============================================================
+  //  4. 核心功能
+  // ============================================================
+
+  // 生成随机爻 (0=阴, 1=阳)
+  function randomLine() {
+    return Math.random() < 0.5 ? '0' : '1';
+  }
+
+  // 生成六个爻 (从下到上)
+  function generateHexagram() {
+    let lines = '';
+    for (let i = 0; i < 6; i++) {
+      lines += randomLine();
+    }
+    return lines;
+  }
+
+  // 根据六爻字符串获取卦象信息
+  function getGuaInfo(lines) {
+    const info = guaMap[lines];
+    if (info) {
+      return info;
+    }
+    // fallback (理论上不会发生)
+    return {
+      name: '未知',
+      lines: lines,
+      desc: '此卦象未收录，请重新起卦。'
+    };
+  }
+
+  // 获取爻位标签
+  function getLineLabel(index, value) {
+    // index: 0=初爻(下), 5=上爻
+    const pos = POSITION_NAMES[index];
+    const yinYang = value === '1' ? '九' : '六';
+    return yinYang + pos;
+  }
+
+  // 渲染六爻
+  function renderLines(lines, animate = true) {
+    // 清空容器
+    linesContainer.innerHTML = '';
+
+    // 从下到上 (索引0=初爻)
+    for (let i = 0; i < 6; i++) {
+      const value = lines[i]; // '1' 阳, '0' 阴
+      const label = getLineLabel(i, value);
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'line-wrapper';
+      if (animate) {
+        wrapper.classList.add('line-appear');
+      }
+
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'line-label';
+      labelSpan.textContent = label;
+
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'line';
+      if (value === '1') {
+        lineDiv.classList.add('line-yang');
+      } else {
+        lineDiv.classList.add('line-yin');
+      }
+
+      wrapper.appendChild(labelSpan);
+      wrapper.appendChild(lineDiv);
+      linesContainer.appendChild(wrapper);
+    }
+  }
+
+  // 更新卦名和解释
+  function updateGuaInfo(guaInfo) {
+    const { name, desc } = guaInfo;
+    guaNameEl.textContent = name || '—';
+    guaSymbolEl.textContent = getGuaSymbol(name);
+    elementTagEl.textContent = getElementTag(name);
+
+    // 显示卦辞
+    interpretationEl.innerHTML = desc || '静待天机...';
+  }
+
+  // 获取卦象符号 (Unicode 易经符号)
+  function getGuaSymbol(name) {
+    const symbols = {
+      '乾': '䷀',
+      '坤': '䷁',
+      '屯': '䷂',
+      '蒙': '䷃',
+      '需': '䷄',
+      '讼': '䷅',
+      '师': '䷆',
+      '比': '䷇',
+      '小畜': '䷈',
+      '履': '䷉',
+      '泰': '䷊',
+      '否': '䷋',
+      '同人': '䷌',
+      '大有': '䷍',
+      '谦': '䷎',
+      '豫': '䷏',
+      '随': '䷐',
+      '蛊': '䷑',
+      '临': '䷒',
+      '观': '䷓',
+      '噬嗑': '䷔',
+      '贲': '䷕',
+      '剥': '䷖',
+      '复': '䷗',
+      '无妄': '䷘',
+      '大畜': '䷙',
+      '颐': '䷚',
+      '大过': '䷛',
+      '坎': '䷜',
+      '离': '䷝',
+      '咸': '䷞',
+      '恒': '䷟',
+      '遁': '䷠',
+      '大壮': '䷡',
+      '晋': '䷢',
+      '明夷': '䷣',
+      '家人': '䷤',
+      '睽': '䷥',
+      '蹇': '䷦',
+      '解': '䷧',
+      '损': '䷨',
+      '益': '䷩',
+      '夬': '䷪',
+      '姤': '䷫',
+      '萃': '䷬',
+      '升': '䷭',
+      '困': '䷮',
+      '井': '䷯',
+      '革': '䷰',
+      '鼎': '䷱',
+      '震': '䷲',
+      '艮': '䷳',
+      '渐': '䷴',
+      '归妹': '䷵',
+      '丰': '䷶',
+      '旅': '䷷',
+      '巽': '䷸',
+      '兑': '䷹',
+      '涣': '䷺',
+      '节': '䷻',
+      '中孚': '䷼',
+      '小过': '䷽',
+      '既济': '䷾',
+      '未济': '䷿'
+    };
+    return symbols[name] || '☯';
+  }
+
+  // 获取五行属性 (基于卦名简单映射)
+  function getElementTag(name) {
+    const map = {
+      '乾': '金',
+      '坤': '土',
+      '震': '木',
+      '巽': '木',
+      '坎': '水',
+      '离': '火',
+      '艮': '土',
+      '兑': '金'
+    };
+    // 从卦名中提取核心八卦
+    const core = name.charAt(0);
+    const element = map[core] || '五行';
+    return '⚡ ' + element;
+  }
+
+  // 清空显示
+  function clearDisplay() {
+    // 重置爻为占位样式
+    const defaultLines = '111000'; // 泰卦作为占位
+    renderLines(defaultLines, false);
+    guaNameEl.textContent = '—';
+    guaSymbolEl.textContent = '☯';
+    elementTagEl.textContent = '五行';
+    interpretationEl.innerHTML = '<span class="empty-hint">🙏 点击「起卦」以占卜</span>';
+  }
+
+  // ============================================================
+  //  5. 起卦主流程 (带动画)
+  // ============================================================
+  function castDivination() {
+    // 禁用按钮，防止连点
+    btnCast.disabled = true;
+
+    // 摇卦动画
+    hexagramArea.classList.add('shaking');
+
+    // 模拟摇卦过程
+    let count = 0;
+    const maxSteps = 6;
+
+    // 先清空
+    linesContainer.innerHTML = '';
+    guaNameEl.textContent = '⋯';
+    guaSymbolEl.textContent = '☯';
+    elementTagEl.textContent = '⋯';
+    interpretationEl.innerHTML = '<span style="color:#b0a090;">⚘ 卦象生成中…</span>';
+
+    // 逐步生成六个爻 (从下到上)
+    const linesArray = [];
+
+    function step() {
+      if (count >= maxSteps) {
+        // 所有爻生成完毕，显示结果
+        const linesStr = linesArray.join('');
+        const guaInfo = getGuaInfo(linesStr);
+
+        // 渲染爻 (带动画)
+        renderLines(linesStr, true);
+
+        // 更新卦名和解释
+        updateGuaInfo(guaInfo);
+
+        // 结束动画状态
+        hexagramArea.classList.remove('shaking');
+        btnCast.disabled = false;
+        return;
+      }
+
+      // 生成一个爻 (从下到上)
+      const lineVal = randomLine();
+      linesArray.push(lineVal);
+
+      // 渲染当前已生成的爻 (从下到上)
+      const currentLines = linesArray.join('');
+      renderLines(currentLines, false);
+
+      // 更新爻位标签显示
+      const index = count;
+      const label = getLineLabel(index, lineVal);
+      // 在底部显示当前进度
+      const progressText = `⚘ 第 ${index+1} 爻 · ${label}`;
+      interpretationEl.innerHTML = `<span style="color:#8a7a6a;">${progressText}</span>`;
+
+      count++;
+      // 随机延迟 120~280ms
+      const delay = 120 + Math.random() * 160;
+      setTimeout(step, delay);
+    }
+
+    // 开始逐步生成
+    setTimeout(step, 200);
+  }
+
+  // ============================================================
+  //  6. 事件绑定
+  // ============================================================
+  btnCast.addEventListener('click', castDivination);
+
+  btnClear.addEventListener('click', function() {
+    // 如果正在生成，重置状态
+    btnCast.disabled = false;
+    hexagramArea.classList.remove('shaking');
+    clearDisplay();
+  });
+
+  // ============================================================
+  //  7. 初始化 - 显示占位卦 (泰卦)
+  // ============================================================
+  (function init() {
+    const defaultLines = '111000'; // 泰卦
+    renderLines(defaultLines, false);
+    const guaInfo = getGuaInfo(defaultLines);
+    updateGuaInfo(guaInfo);
+  })();
+</script>
+
+</body>
+</html>
